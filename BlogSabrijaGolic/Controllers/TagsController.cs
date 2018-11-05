@@ -22,9 +22,10 @@ namespace BlogSabrijaGolic.Controllers
 
         // GET: api/Tags
         [HttpGet]
-        public IEnumerable<Tag> GetTag()
+        public IActionResult GetTag()
         {
-            return _context.Tag;
+
+            return Ok(new { Tags = _context.Tag.Select(t => t.Name).ToList() });
         }
 
         

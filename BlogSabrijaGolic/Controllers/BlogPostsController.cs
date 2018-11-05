@@ -20,46 +20,63 @@ namespace BlogSabrijaGolic.Controllers
         {
             _context = context;
         }
-
-        // GET: api/BlogPosts
-        [HttpGet]
-        public IActionResult GetBlogPosts()
-        {
-
-            return Ok(new { BlogPosts = _context.BlogPost.Include(x => x.TagList).Select(x => new BlogPostModel() { ID=x.ID, Slug = x.Slug, Title = x.Title, Description = x.Description,
-                Body = x.Body, TagList = ReturnTags(x.TagList), CratedAt = x.CratedAt, UpdatedAt = x.UpdatedAt
-            }), PostsCount = _context.BlogPost.Count() });
-        }
+        
         // GET: api/BlogPosts?tag=android
-        /*[HttpGet]
+        [HttpGet]
         public IActionResult GetBlogPosts([FromQuery]string tag)
         {
-            BlogPostTag blogPostTag = new BlogPostTag();
-            blogPostTag.Tag.Name = tag;
-           
-            return Ok(new { BlogPosts = _context.BlogPost.Where(x => x.TagList.Contains(blogPostTag)), PostsCount = _context.BlogPost.Count() });
-        }*/
+            var blogPostsAll = _context.BlogPost.Select(bp => new BlogPostModel()
+            {
+                ID = bp.ID,
+                Slug = bp.Slug,
+                Title = bp.Title,
+                Description = bp.Description,
+                Body = bp.Body,
+                TagList = bp.TagList.Select(tl => tl.Tag.Name).ToList(),
+                CratedAt = bp.CratedAt,
+                UpdatedAt = bp.UpdatedAt
+            });
+            if (tag != null)
+            {
+                var blogPostsFiltered = blogPostsAll.Where(x => x.TagList.Contains(tag)).ToList();
+                return Ok(new { BlogPosts = blogPostsFiltered, PostsCount = blogPostsFiltered.Count() });                
+            }
+            else
+            {
+                return Ok(new { BlogPosts = blogPostsAll, PostsCount = blogPostsAll.Count() });
 
-        // GET: api/BlogPosts/generic-slug
+            }
+        }
+        
+
+        // GET: api/posts/generic-slug
         [HttpGet("{slug}")]
-        public async Task<IActionResult> GetBlogPost([FromRoute] string slug)
+        public IActionResult GetBlogPost([FromRoute] string slug)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var blogPost = await _context.BlogPost.SingleOrDefaultAsync(x => x.Slug.Equals(slug));
-
+            var blogPost = _context.BlogPost.Select(bp => new BlogPostModel()
+            {
+                ID = bp.ID,
+                Slug = bp.Slug,
+                Title = bp.Title,
+                Description = bp.Description,
+                Body = bp.Body,
+                TagList = bp.TagList.Select(tl => tl.Tag.Name).ToList(),
+                CratedAt = bp.CratedAt,
+                UpdatedAt = bp.UpdatedAt
+            }).Where(x => x.Slug.Equals(slug));
             if (blogPost == null)
             {
                 return NotFound();
             }
-
             return Ok(blogPost);
         }
 
-        // PUT: api/BlogPosts/generic-slug
+        // PUT: api/posts/generic-slug
         [HttpPut("{slug}")]
         public async Task<IActionResult> PutBlogPost([FromRoute] string slug, [FromBody] BlogPost blogPost)
         {
@@ -72,7 +89,7 @@ namespace BlogSabrijaGolic.Controllers
             {
                 return BadRequest();
             }
-            
+
             _context.Entry(blogPost).State = EntityState.Modified;
 
 
@@ -95,7 +112,7 @@ namespace BlogSabrijaGolic.Controllers
             return NoContent();
         }
 
-        // POST: api/BlogPosts
+        // POST: api/posts
         [HttpPost]
         public async Task<IActionResult> PostBlogPost([FromBody] BlogPostModel blogPost)
         {
@@ -104,7 +121,7 @@ namespace BlogSabrijaGolic.Controllers
                 return BadRequest(ModelState);
             }
             var dateTime = DateTime.Now;
-            
+
             BlogPost blog = new BlogPost
             {
                 Slug = SlugCreator.GetFriendlyTitle(blogPost.Title, true),
@@ -117,15 +134,22 @@ namespace BlogSabrijaGolic.Controllers
             };
             foreach (string tag in blogPost.TagList)
             {
-                _context.BlogPostTags.Add(new BlogPostTag { Tag = new Tag { Name = tag }, BlogPost = blog });
-                //_context.Tag.Add(new Tag{ Name = tag });                
-            }          
-            
+                if (_context.Tag.FirstOrDefault(x => x.Name.Equals(tag)) != null)
+                {
+                    _context.BlogPostTags.Add(new BlogPostTag { Tag = new Tag { Name = tag }, BlogPost = blog });
+                }
+                else
+                {
+
+                }
+
+            }
+
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetBlogPosts", new { id = blogPost.ID }, blogPost);
         }
 
-        // DELETE: api/BlogPosts/generic-slug
+        // DELETE: api/posts/generic-slug
         [HttpDelete("{slug}")]
         public async Task<IActionResult> DeleteBlogPost([FromRoute] string slug)
         {
@@ -150,16 +174,8 @@ namespace BlogSabrijaGolic.Controllers
         {
             return _context.BlogPost.Any(e => e.Slug == slug);
         }
-        private List<string> ReturnTags(List<BlogPostTag> blogPostTag)
-        {
-            List<string> ListOfTag = new List<string>();
-            foreach (BlogPostTag tag in blogPostTag)
-            {
-                ListOfTag.Add(tag.Tag.Name);
-            }
-            return ListOfTag;
-        }
+
     }
 
-    
+
 }
