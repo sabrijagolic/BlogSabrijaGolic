@@ -9,7 +9,8 @@ using BlogSabrijaGolic.Models;
 
 namespace BlogSabrijaGolic.Controllers
 {
-    [Route("api/[controller]")]
+    [Produces("application/json")]
+    [Route("api/posts")]
     [ApiController]
     public class BlogPostsController : ControllerBase
     {
@@ -22,21 +23,31 @@ namespace BlogSabrijaGolic.Controllers
 
         // GET: api/BlogPosts
         [HttpGet]
-        public IEnumerable<BlogPost> GetBlogPost()
+        public IActionResult GetBlogPosts()
         {
-            return _context.BlogPost;
-        }
 
-        // GET: api/BlogPosts/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetBlogPost([FromRoute] int id)
+            return Ok(new { BlogPosts = _context.BlogPost, PostsCount = _context.BlogPost.Count() });
+        }
+        // GET: api/BlogPosts?tag=android
+        /*[HttpGet]
+        public IActionResult GetBlogPosts([FromQuery]string tag)
+        {
+            BlogPostTag blogPostTag = new BlogPostTag();
+            blogPostTag.Tag.Name = tag;
+           
+            return Ok(new { BlogPosts = _context.BlogPost.Where(x => x.TagList.Contains(blogPostTag)), PostsCount = _context.BlogPost.Count() });
+        }*/
+
+        // GET: api/BlogPosts/generic-slug
+        [HttpGet("{slug}")]
+        public async Task<IActionResult> GetBlogPost([FromRoute] string slug)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var blogPost = await _context.BlogPost.FindAsync(id);
+            var blogPost = await _context.BlogPost.SingleOrDefaultAsync(x => x.Slug.Equals(slug));
 
             if (blogPost == null)
             {
@@ -46,16 +57,16 @@ namespace BlogSabrijaGolic.Controllers
             return Ok(blogPost);
         }
 
-        // PUT: api/BlogPosts/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBlogPost([FromRoute] int id, [FromBody] BlogPost blogPost)
+        // PUT: api/BlogPosts/generic-slug
+        [HttpPut("{slug}")]
+        public async Task<IActionResult> PutBlogPost([FromRoute] string slug, [FromBody] BlogPost blogPost)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != blogPost.ID)
+            if (slug != blogPost.Slug)
             {
                 return BadRequest();
             }
@@ -68,7 +79,7 @@ namespace BlogSabrijaGolic.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BlogPostExists(id))
+                if (!BlogPostExists(slug))
                 {
                     return NotFound();
                 }
@@ -89,23 +100,25 @@ namespace BlogSabrijaGolic.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            blogPost.Slug = SlugCreator.GetFriendlyTitle(blogPost.Title, true);
+            blogPost.CratedAt = DateTime.Now;
+            blogPost.UpdatedAt = DateTime.Now;
             _context.BlogPost.Add(blogPost);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBlogPost", new { id = blogPost.ID }, blogPost);
+            return CreatedAtAction("GetBlogPosts", new { id = blogPost.ID }, blogPost);
         }
 
-        // DELETE: api/BlogPosts/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBlogPost([FromRoute] int id)
+        // DELETE: api/BlogPosts/generic-slug
+        [HttpDelete("{slug}")]
+        public async Task<IActionResult> DeleteBlogPost([FromRoute] string slug)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var blogPost = await _context.BlogPost.FindAsync(id);
+            var blogPost = await _context.BlogPost.FirstOrDefaultAsync(x => x.Slug.Equals(slug));
             if (blogPost == null)
             {
                 return NotFound();
@@ -117,9 +130,11 @@ namespace BlogSabrijaGolic.Controllers
             return Ok(blogPost);
         }
 
-        private bool BlogPostExists(int id)
+        private bool BlogPostExists(string slug)
         {
-            return _context.BlogPost.Any(e => e.ID == id);
+            return _context.BlogPost.Any(e => e.Slug == slug);
         }
     }
+
+    
 }

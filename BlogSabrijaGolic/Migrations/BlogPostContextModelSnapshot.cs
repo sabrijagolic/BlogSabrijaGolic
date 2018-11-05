@@ -43,23 +43,25 @@ namespace BlogSabrijaGolic.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("BlogPostID");
+                    b.Property<int>("BlogPostId");
 
-                    b.Property<int>("TagID");
+                    b.Property<int>("TagId");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("BlogPostID");
+                    b.HasIndex("BlogPostId");
 
-                    b.HasIndex("TagID");
+                    b.HasIndex("TagId");
 
-                    b.ToTable("BlogPostTag");
+                    b.ToTable("BlogPostTags");
                 });
 
             modelBuilder.Entity("BlogSabrijaGolic.Models.Tag", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<int>("BlogPostTagId");
 
                     b.Property<string>("Name");
 
@@ -71,13 +73,13 @@ namespace BlogSabrijaGolic.Migrations
             modelBuilder.Entity("BlogSabrijaGolic.Models.BlogPostTag", b =>
                 {
                     b.HasOne("BlogSabrijaGolic.Models.BlogPost", "BlogPost")
-                        .WithMany("tagList")
-                        .HasForeignKey("BlogPostID")
+                        .WithMany("TagList")
+                        .HasForeignKey("BlogPostId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("BlogSabrijaGolic.Models.Tag", "Tag")
-                        .WithMany("BlogPosts")
-                        .HasForeignKey("TagID")
+                        .WithMany("BlogPostTag")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618

@@ -31,7 +31,8 @@ namespace BlogSabrijaGolic.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: true),
+                    BlogPostTagId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -39,46 +40,46 @@ namespace BlogSabrijaGolic.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BlogPostTag",
+                name: "BlogPostTags",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TagID = table.Column<int>(nullable: false),
-                    BlogPostID = table.Column<int>(nullable: false)
+                    TagId = table.Column<int>(nullable: false),
+                    BlogPostId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BlogPostTag", x => x.ID);
+                    table.PrimaryKey("PK_BlogPostTags", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_BlogPostTag_BlogPost_BlogPostID",
-                        column: x => x.BlogPostID,
+                        name: "FK_BlogPostTags_BlogPost_BlogPostId",
+                        column: x => x.BlogPostId,
                         principalTable: "BlogPost",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BlogPostTag_Tag_TagID",
-                        column: x => x.TagID,
+                        name: "FK_BlogPostTags_Tag_TagId",
+                        column: x => x.TagId,
                         principalTable: "Tag",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlogPostTag_BlogPostID",
-                table: "BlogPostTag",
-                column: "BlogPostID");
+                name: "IX_BlogPostTags_BlogPostId",
+                table: "BlogPostTags",
+                column: "BlogPostId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlogPostTag_TagID",
-                table: "BlogPostTag",
-                column: "TagID");
+                name: "IX_BlogPostTags_TagId",
+                table: "BlogPostTags",
+                column: "TagId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BlogPostTag");
+                name: "BlogPostTags");
 
             migrationBuilder.DropTable(
                 name: "BlogPost");

@@ -27,7 +27,10 @@ namespace BlogSabrijaGolic
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc(options =>
+            {
+                options.RespectBrowserAcceptHeader = true; // false by default
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddDbContext<BlogPostContext>(options =>
                   options.UseSqlite("Data Source=Blog.db"));
         }
@@ -45,7 +48,10 @@ namespace BlogSabrijaGolic
             }
 
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
             app.UseMvc();
+            
             
         }
     }
