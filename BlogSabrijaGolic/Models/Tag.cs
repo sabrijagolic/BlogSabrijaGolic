@@ -10,7 +10,7 @@ namespace BlogSabrijaGolic.Models
         public int ID { get; set; }
         public string Name { get; set; }
         public List<BlogPostTag> BlogPostTag {get; set;}
-        public int BlogPostTagId { get; set; }
+        
 
     }
 }

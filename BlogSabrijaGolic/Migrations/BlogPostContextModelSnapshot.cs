@@ -40,16 +40,11 @@ namespace BlogSabrijaGolic.Migrations
 
             modelBuilder.Entity("BlogSabrijaGolic.Models.BlogPostTag", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd();
-
                     b.Property<int>("BlogPostId");
 
                     b.Property<int>("TagId");
 
-                    b.HasKey("ID");
-
-                    b.HasIndex("BlogPostId");
+                    b.HasKey("BlogPostId", "TagId");
 
                     b.HasIndex("TagId");
 
@@ -60,8 +55,6 @@ namespace BlogSabrijaGolic.Migrations
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<int>("BlogPostTagId");
 
                     b.Property<string>("Name");
 

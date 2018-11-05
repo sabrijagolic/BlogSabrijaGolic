@@ -26,7 +26,9 @@ namespace BlogSabrijaGolic.Controllers
         public IActionResult GetBlogPosts()
         {
 
-            return Ok(new { BlogPosts = _context.BlogPost, PostsCount = _context.BlogPost.Count() });
+            return Ok(new { BlogPosts = _context.BlogPost.Include(x => x.TagList).Select(x => new BlogPostModel() { ID=x.ID, Slug = x.Slug, Title = x.Title, Description = x.Description,
+                Body = x.Body, TagList = ReturnTags(x.TagList), CratedAt = x.CratedAt, UpdatedAt = x.UpdatedAt
+            }), PostsCount = _context.BlogPost.Count() });
         }
         // GET: api/BlogPosts?tag=android
         /*[HttpGet]
@@ -70,8 +72,9 @@ namespace BlogSabrijaGolic.Controllers
             {
                 return BadRequest();
             }
-
+            
             _context.Entry(blogPost).State = EntityState.Modified;
+
 
             try
             {
@@ -94,18 +97,31 @@ namespace BlogSabrijaGolic.Controllers
 
         // POST: api/BlogPosts
         [HttpPost]
-        public async Task<IActionResult> PostBlogPost([FromBody] BlogPost blogPost)
+        public async Task<IActionResult> PostBlogPost([FromBody] BlogPostModel blogPost)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            blogPost.Slug = SlugCreator.GetFriendlyTitle(blogPost.Title, true);
-            blogPost.CratedAt = DateTime.Now;
-            blogPost.UpdatedAt = DateTime.Now;
-            _context.BlogPost.Add(blogPost);
-            await _context.SaveChangesAsync();
+            var dateTime = DateTime.Now;
+            
+            BlogPost blog = new BlogPost
+            {
+                Slug = SlugCreator.GetFriendlyTitle(blogPost.Title, true),
+                Title = blogPost.Title,
+                Description = blogPost.Description,
+                Body = blogPost.Body,
+                CratedAt = dateTime,
+                UpdatedAt = dateTime
 
+            };
+            foreach (string tag in blogPost.TagList)
+            {
+                _context.BlogPostTags.Add(new BlogPostTag { Tag = new Tag { Name = tag }, BlogPost = blog });
+                //_context.Tag.Add(new Tag{ Name = tag });                
+            }          
+            
+            await _context.SaveChangesAsync();
             return CreatedAtAction("GetBlogPosts", new { id = blogPost.ID }, blogPost);
         }
 
@@ -133,6 +149,15 @@ namespace BlogSabrijaGolic.Controllers
         private bool BlogPostExists(string slug)
         {
             return _context.BlogPost.Any(e => e.Slug == slug);
+        }
+        private List<string> ReturnTags(List<BlogPostTag> blogPostTag)
+        {
+            List<string> ListOfTag = new List<string>();
+            foreach (BlogPostTag tag in blogPostTag)
+            {
+                ListOfTag.Add(tag.Tag.Name);
+            }
+            return ListOfTag;
         }
     }
 

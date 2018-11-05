@@ -22,8 +22,9 @@ namespace BlogSabrijaGolic.Models
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BlogPost>().HasMany(t => t.TagList).WithOne(x => x.BlogPost).HasForeignKey(k => k.BlogPostId);
-            modelBuilder.Entity<Tag>().HasMany(t => t.BlogPostTag).WithOne(x => x.Tag).HasForeignKey(k => k.TagId);
+            modelBuilder.Entity<BlogPostTag>().HasKey(bc => new { bc.BlogPostId, bc.TagId });
+            modelBuilder.Entity<BlogPostTag>().HasOne(t => t.BlogPost).WithMany(x => x.TagList).HasForeignKey(k => k.BlogPostId);
+            modelBuilder.Entity<BlogPostTag>().HasOne(t => t.Tag).WithMany(x => x.BlogPostTag).HasForeignKey(k => k.TagId);            
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -31,8 +31,7 @@ namespace BlogSabrijaGolic.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: true),
-                    BlogPostTagId = table.Column<int>(nullable: false)
+                    Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -43,14 +42,12 @@ namespace BlogSabrijaGolic.Migrations
                 name: "BlogPostTags",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
                     TagId = table.Column<int>(nullable: false),
                     BlogPostId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BlogPostTags", x => x.ID);
+                    table.PrimaryKey("PK_BlogPostTags", x => new { x.BlogPostId, x.TagId });
                     table.ForeignKey(
                         name: "FK_BlogPostTags_BlogPost_BlogPostId",
                         column: x => x.BlogPostId,
@@ -64,11 +61,6 @@ namespace BlogSabrijaGolic.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BlogPostTags_BlogPostId",
-                table: "BlogPostTags",
-                column: "BlogPostId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BlogPostTags_TagId",

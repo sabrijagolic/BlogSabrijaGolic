@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogSabrijaGolic.Migrations
 {
     [DbContext(typeof(BlogPostContext))]
-    [Migration("20181105015251_Initial")]
+    [Migration("20181105150944_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,16 +42,11 @@ namespace BlogSabrijaGolic.Migrations
 
             modelBuilder.Entity("BlogSabrijaGolic.Models.BlogPostTag", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd();
-
                     b.Property<int>("BlogPostId");
 
                     b.Property<int>("TagId");
 
-                    b.HasKey("ID");
-
-                    b.HasIndex("BlogPostId");
+                    b.HasKey("BlogPostId", "TagId");
 
                     b.HasIndex("TagId");
 
@@ -62,8 +57,6 @@ namespace BlogSabrijaGolic.Migrations
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<int>("BlogPostTagId");
 
                     b.Property<string>("Name");
 
