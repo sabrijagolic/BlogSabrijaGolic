@@ -14,9 +14,9 @@ namespace BlogSabrijaGolic.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Slug = table.Column<string>(nullable: true),
-                    Title = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    Body = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: false),
+                    Body = table.Column<string>(nullable: false),
                     CratedAt = table.Column<DateTime>(nullable: false),
                     UpdatedAt = table.Column<DateTime>(nullable: false)
                 },

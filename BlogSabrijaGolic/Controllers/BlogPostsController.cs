@@ -107,7 +107,7 @@ namespace BlogSabrijaGolic.Controllers
 
             }
             blog.UpdatedAt = DateTime.Now;
-
+            blog.Slug = SlugCreator.GetFriendlyTitle(blog.Title + "-" + blog.CratedAt.ToUniversalTime().ToString(), true);
             _context.Entry(blog).State = EntityState.Modified;
            
             
@@ -128,7 +128,7 @@ namespace BlogSabrijaGolic.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(blog);
         }
 
         // POST: api/posts

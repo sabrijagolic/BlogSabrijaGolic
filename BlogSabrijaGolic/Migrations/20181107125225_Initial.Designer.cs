@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogSabrijaGolic.Migrations
 {
     [DbContext(typeof(BlogPostContext))]
-    [Migration("20181105150944_Initial")]
+    [Migration("20181107125225_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,15 +23,18 @@ namespace BlogSabrijaGolic.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Body");
+                    b.Property<string>("Body")
+                        .IsRequired();
 
                     b.Property<DateTime>("CratedAt");
 
-                    b.Property<string>("Description");
+                    b.Property<string>("Description")
+                        .IsRequired();
 
                     b.Property<string>("Slug");
 
-                    b.Property<string>("Title");
+                    b.Property<string>("Title")
+                        .IsRequired();
 
                     b.Property<DateTime>("UpdatedAt");
 

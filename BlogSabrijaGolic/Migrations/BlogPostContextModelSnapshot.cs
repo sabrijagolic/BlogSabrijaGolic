@@ -21,15 +21,18 @@ namespace BlogSabrijaGolic.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Body");
+                    b.Property<string>("Body")
+                        .IsRequired();
 
                     b.Property<DateTime>("CratedAt");
 
-                    b.Property<string>("Description");
+                    b.Property<string>("Description")
+                        .IsRequired();
 
                     b.Property<string>("Slug");
 
-                    b.Property<string>("Title");
+                    b.Property<string>("Title")
+                        .IsRequired();
 
                     b.Property<DateTime>("UpdatedAt");
 
