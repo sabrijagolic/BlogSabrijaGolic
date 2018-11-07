@@ -38,7 +38,7 @@ namespace BlogSabrijaGolic.Controllers
             });
             if (tag != null)
             {
-                var blogPostsFiltered = blogPostsAll.Where(x => x.TagList.Contains(tag)).ToList();
+                var blogPostsFiltered = blogPostsAll.Where(x => x.TagList.Contains(tag)).OrderByDescending( x=> x.CratedAt).ToList();
                 return Ok(new { BlogPosts = blogPostsFiltered, PostsCount = blogPostsFiltered.Count() });                
             }
             else
@@ -78,26 +78,45 @@ namespace BlogSabrijaGolic.Controllers
 
         // PUT: api/posts/generic-slug
         [HttpPut("{slug}")]
-        public async Task<IActionResult> PutBlogPost([FromRoute] string slug, [FromBody] BlogPost blogPost)
+        public async Task<IActionResult> PutBlogPostAsync([FromRoute] string slug, [FromBody] BlogPostModel blogPost)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            if (slug != blogPost.Slug)
+            if (!BlogPostExists(slug))
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(blogPost).State = EntityState.Modified;
+            BlogPost blog = _context.BlogPost.FirstOrDefault(x => x.Slug.Equals(slug));
 
+            if(blogPost.Title != null)
+            {
+                blog.Title =  blogPost.Title;
+                
+            }
+            if (blogPost.Description != null)
+            {
+                blog.Description = blogPost.Description;
 
+            }
+            if (blogPost.Body != null)
+            {
+                blog.Body = blogPost.Body;
+
+            }
+            blog.UpdatedAt = DateTime.Now;
+
+            _context.Entry(blog).State = EntityState.Modified;
+           
+            
+            
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!BlogPostExists(slug))
                 {
@@ -121,32 +140,29 @@ namespace BlogSabrijaGolic.Controllers
                 return BadRequest(ModelState);
             }
             var dateTime = DateTime.Now;
-
             BlogPost blog = new BlogPost
             {
-                Slug = SlugCreator.GetFriendlyTitle(blogPost.Title, true),
+                Slug = SlugCreator.GetFriendlyTitle(blogPost.Title + "-" + dateTime.ToUniversalTime().ToString(), true),
                 Title = blogPost.Title,
                 Description = blogPost.Description,
                 Body = blogPost.Body,
                 CratedAt = dateTime,
                 UpdatedAt = dateTime
-
-            };
-            foreach (string tag in blogPost.TagList)
+            };            
+            foreach (string tag in blogPost.TagList)                
             {
-                if (_context.Tag.FirstOrDefault(x => x.Name.Equals(tag)) != null)
+                if (_context.Tag.FirstOrDefault(x => x.Name.Equals(tag)) == null)
                 {
                     _context.BlogPostTags.Add(new BlogPostTag { Tag = new Tag { Name = tag }, BlogPost = blog });
                 }
                 else
                 {
-
+                    _context.BlogPostTags.Add(new BlogPostTag { Tag = _context.Tag.FirstOrDefault(x => x.Name.Equals(tag)), BlogPost = blog });
                 }
-
             }
-
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetBlogPosts", new { id = blogPost.ID }, blogPost);
+            
         }
 
         // DELETE: api/posts/generic-slug
